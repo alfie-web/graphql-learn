@@ -1,9 +1,19 @@
-const { GraphQLObjectType, GraphQLString, GraphQLSchema, GraphQLID, GraphQLInt } = require('graphql');
+const { 
+	GraphQLObjectType, 
+	GraphQLString, 
+	GraphQLSchema, 
+	GraphQLID, 
+	GraphQLInt,
+	GraphQLList,
+} = require('graphql');
 
 const movies = [
 	{ id: '1', name: 'The Matrix', genre: 'Cyberpunk', directorId: '1'},
 	{ id: '2', name: 'Fast and furious', genre: 'Action', directorId: '2'},
-	{ id: 3, name: 'Home Alone', genre: 'Komedy', directorId: '3'},
+	{ id: '3', name: 'Snatch', genre: 'Comedy', directorId: '2'},
+	{ id: '4', name: 'Home Alone', genre: 'Comedy', directorId: '3'},
+	{ id: '5', name: '1984', genre: 'Sci-Fi', directorId: '3'},
+	{ id: '6', name: 'Home Alone', genre: 'Comedy', directorId: '3'},
 ]
 
 const directors = [
@@ -52,6 +62,12 @@ const DirectorType = new GraphQLObjectType({
 		id: { type: GraphQLID },
 		name: { type: GraphQLString },
 		age: { type: GraphQLInt },
+		movies: {
+			type: new GraphQLList(MovieType),
+			resolve(parent, args) {
+				return movies.filter(m => m.directorId === parent.id)
+			}
+		}
 	})
 })
 
@@ -71,6 +87,18 @@ const Query = new GraphQLObjectType({
 			args: { id: { type: GraphQLID }},		// Свойство args описывает, какие аргументы принимает запрос 
 			resolve(parent, args) {
 				return directors.find(d => d.id == args.id);
+			}
+		},
+		movies: {
+			type: GraphQLList(MovieType),
+			resolve(parent, args) {
+				return movies
+			}
+		},
+		directors: {
+			type: GraphQLList(DirectorType),
+			resolve(parent, args) {
+				return directors
 			}
 		}
 	}
