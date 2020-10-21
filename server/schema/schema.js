@@ -26,6 +26,29 @@ const { MovieModel, DirectorModel } = require('../models');
 // 	"id": 1
 // }
 
+// для получания всех фильмов
+// query {
+// 	movies {
+// 		name,
+// 		genre
+// 	}
+// }
+
+
+// Пример мутации
+// mutation($name: String, $age: Int){
+// 	addDirector(name: $name, age: $age) {
+// 		name,
+// 			age
+// 	}
+// }
+// query variables
+// {
+// 	"name": "Test",
+// 		"age": 22
+// }
+
+
 
 // Схема данных, описывающая сущность (фильм)
 const MovieType = new GraphQLObjectType({
@@ -58,7 +81,8 @@ const DirectorType = new GraphQLObjectType({
 	})
 })
 
-// Корневой запрос, который описывается все подзапросы, свазанные с сущностью (фильмом)
+
+// Корневой запрос, который описывается все подзапросы, на получение данных
 const Query = new GraphQLObjectType({
 	name: 'Query',
 	fields: {
@@ -91,6 +115,44 @@ const Query = new GraphQLObjectType({
 	}
 })
 
+// Мутации это запросы на добавление новый объектов в БД
+const Mutation = new GraphQLObjectType({
+	name: 'Mutation',
+	fields: {
+		addDirector: {
+			type: DirectorType,
+			args: {
+				name: { type: GraphQLString },
+				age: { type: GraphQLInt },
+			},
+			resolve(parent, args) {
+				const director = new DirectorModel({
+					name: args.name,
+					age: args.age
+				})
+				return director.save()
+			}
+		},
+		addMovie: {
+			type: MovieType,
+			args: {
+				name: { type: GraphQLString },
+				genre: { type: GraphQLString },
+				directorId: { type: GraphQLID },
+			},
+			resolve(parent, args) {
+				const movie = new MovieModel({
+					name: args.name,
+					genre: args.genre,
+					directorId: args.directorId,
+				})
+				return movie.save()
+			}
+		}
+	}
+})
+
 module.exports = new GraphQLSchema({
-	query: Query
+	query: Query,
+	mutation: Mutation
 })
